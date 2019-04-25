@@ -27,8 +27,8 @@ char keys[ROWS][COLS] = {
 
 };
 
-byte rowPins[ROWS] = { 6, 7, 8, 9 };// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins
-byte colPins[COLS] = { 10, 11, 12, 13 };// Connect keypad COL0, COL1 and COL2 to t
+byte rowPins[ROWS] = { 7, 8, 9,10 };// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins
+byte colPins[COLS] = { 11, 12, 13, 14 };// Connect keypad COL0, COL1 and COL2 to t
 
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
