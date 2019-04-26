@@ -1,9 +1,10 @@
+
+
 #include <LiquidCrystal.h>
 #include <Keypad.h>
 
 const byte ROWS = 4; // Four rows
 const byte COLS = 4; // Three columns
-
 long int set1;
 long int set2;
 long int set3;
@@ -27,8 +28,8 @@ char keys[ROWS][COLS] = {
 
 };
 
-byte rowPins[ROWS] = { 7, 8, 9,10 };// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins
-byte colPins[COLS] = { 11, 12, 13, 14 };// Connect keypad COL0, COL1 and COL2 to t
+byte rowPins[ROWS] = { 6, 7, 8, 9 };// Connect keypad ROW0, ROW1, ROW2 and ROW3 to these Arduino pins
+byte colPins[COLS] = { 10, 11, 12, 13 };// Connect keypad COL0, COL1 and COL2 to t
 
 Keypad kpd = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
@@ -37,7 +38,7 @@ LiquidCrystal lcd(A0, A1, 5, 4, 3, 2); // Creates an LC object. Parameters: (rs,
 int t1, t2, t3, t4, t5, t6;
 int r1, r2, r3;
 
-boolean feed = true; // condition for shedding
+boolean feed = true; // condition for alarm
 
 char key;
 String r[8];
@@ -49,7 +50,10 @@ void setFeedingTime()
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Set feeding Time");
+  lcd.print("Set Shedding");
+  lcd.setCursor(0, 1);
+  lcd.print("Timings");
+  delay(1500);
   lcd.clear();
   lcd.print("HH:MM:SS");
   lcd.setCursor(0, 1);
@@ -74,7 +78,7 @@ void setFeedingTime()
       {
         lcd.print(":"); j++;
       }
-      delay(500);
+      delay(250);
     }
 
     if (key == 'D')
@@ -89,7 +93,7 @@ void setFeedingTime()
 void setup()
 {
   lcd.begin(16, 2);
-  Serial.begin(9600);
+  // Serial.begin(9600);
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
   pinMode(A3, INPUT);
@@ -99,88 +103,93 @@ void setup()
 void loop()
 {
   lcd.setCursor(0, 0);
-  lcd.print("AUTOMATIC LOAD");
+  lcd.print("Automatic Load");
   lcd.setCursor(0, 1);
-  lcd.print("SHEDDING");
-  Serial.println(A3);
-
-  if (digitalRead(A3) == 1)
-  {
-    lcd.clear();
-    setFeedingTime();
-    for (int i = 0; i < 6; i++) // this for loop is used to get the value of the feeding time and print it serially
+  lcd.print("Shedding");
+  //Serial.println(A3);
+  delay(1500);
+  lcd.clear();
+  setFeedingTime();
+  /*  for (int i = 0; i < 6; i++)       // this for loop is used to get the value of the feeding time and print it serially
     {
       Serial.print(r[i]);
       Serial.println();
-    }
-    digitalWrite(A4, HIGH);
-    hours = String (r[0]) + String (r[1]) ; //combining two separate int values of r[0] and r[1] into one string and save it to "hours"
-    minutes = String (r[2]) + String (r[3]) ;  //combining two separate int values of r[2] and r[3] into one string and save it to "minutes"
-    seconds = String (r[4]) + String (r[5]) ;  //combining two separate int values of r[4] and r[5] into one string and save it to "seconds"
+    }*/
+
+  hours = String (r[0]) + String (r[1]) ; //combining two separate int values of r[0] and r[1] into one string and save it to "hours"
+  minutes = String (r[2]) + String (r[3]) ;  //combining two separate int values of r[2] and r[3] into one string and save it to "minutes"
+  seconds = String (r[4]) + String (r[5]) ;  //combining two separate int values of r[4] and r[5] into one string and save it to "seconds"
 
 
-    set1 = (hours.toInt() * 3600); //converting hours into seconds
-    set2 = (minutes.toInt() * 60);  //converting minutes into seconds
-    set3 = seconds.toInt();
-    set4 = (hours.toInt() * 3600) + (minutes.toInt() * 60) + seconds.toInt(); //adding set1, set2 and set3 together in set4
-    Serial.print("set4");
-    Serial.print(set4);
-    Serial.println();
+  set1 = (hours.toInt() * 3600); //converting hours into seconds
+  set2 = (minutes.toInt() * 60);  //converting minutes into seconds
+  set3 = seconds.toInt();
+  set4 = (hours.toInt() * 3600) + (minutes.toInt() * 60) + seconds.toInt(); //adding set1, set2 and set3 together in set4
+  // Serial.print("set4");
+  // Serial.print(set4);
+  // Serial.println();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Load is ON");
+  delay(750);
+  lcd.clear();
+  digitalWrite(A4, HIGH); // set the Relay high
+
+  for (long int j = set4; j >= 0; j--) // this for loopis used to decrease the total time in seconds
+  {
+    //  Serial.println(j);
 
     lcd.setCursor(0, 0);
-    lcd.print("Countdown begins");
-    delay(1000);
-    lcd.clear();
+    lcd.print("HH:MM:SS");
 
-    for (long int j = set4; j >= 0; j--) // this for loop is used to decrease the total time in seconds
+    long int HH = j / 3600; // converting the remaining time into remaining hours
+    lcd.setCursor(0, 1);
+    //  Serial.println(HH);
+    if (HH < 10)
     {
-      Serial.println(j);
+      lcd.print('0');
+    }
+    lcd.print(HH);
+    lcd.print(":");
 
+    long int MM = (j - (HH * 3600)) / 60 ; //converting the remaining time into remaining minutes
+    lcd.setCursor(3, 1);
+    //Serial.println(MM);
+    if (MM < 10)
+    {
+      lcd.print('0');
+    }
+    lcd.print(MM);
+    lcd.print(":");
+
+    long int SS = j - ((HH * 3600) + (MM * 60)); //converting the remaining time into remaining seconds
+    lcd.setCursor(6, 1);
+    //Serial.println(SS);
+    if (SS < 10) {
+      lcd.print('0');
+    }
+    lcd.print(SS);
+    delay(500);
+
+    if (digitalRead(A3) == 1) {
+      digitalWrite(A4, LOW);
+      break;
+    }
+
+    if (j == 0)
+
+    {
+      digitalWrite(A4, LOW);   // Set the Relay LOW
+      lcd.clear();
       lcd.setCursor(0, 0);
-      lcd.print("HH:MM:SS");
+      lcd.print("Timer Stop");
+      lcd.setCursor(2, 1);
+      lcd.print("Load is OFF");
+      delay(2000);
+      lcd.clear();
 
-      long int HH = j / 3600; // converting the remaining time into remaining hours
-      lcd.setCursor(0, 1);
-      Serial.println(HH);
-      if (HH < 10) {
-        lcd.print('0');
-      }
-      lcd.print(HH);
-      lcd.print(":");
-
-      long int MM = (j - (HH * 3600)) / 60 ; //converting the remaining time into remaining minutes
-      lcd.setCursor(3, 1);
-      Serial.println(MM);
-      if (MM < 10) {
-        lcd.print('0');
-      }
-      lcd.print(MM);
-      lcd.print(":");
-
-      long int SS = j - ((HH * 3600) + (MM * 60)); //converting the remaining time into remaining seconds
-      lcd.setCursor(6, 1);
-      Serial.println(SS);
-      if (SS < 10) {
-        lcd.print('0');
-      }
-      lcd.print(SS);
-      delay(1000);
-
-      if (digitalRead(A3) == 1) {
-        break;
-      }
-
-      if (j == 0)
-
-      {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("Timer Stop");
-        lcd.setCursor(2, 1);
-        lcd.print("Load is OFF");
-        digitalWrite(A4, LOW);
-
-      }
     }
   }
 }
+
+
