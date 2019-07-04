@@ -10,7 +10,7 @@ long int set2;
 long int set3;
 long int set4;
 long int j;
-
+int Relay=A4;
 String hours;
 String minutes;
 String seconds;
@@ -94,10 +94,8 @@ void setup()
 {
   lcd.begin(16, 2);
   // Serial.begin(9600);
-  pinMode(A0, OUTPUT);
-  pinMode(A1, OUTPUT);
   pinMode(A3, INPUT);
-  pinMode(A4, OUTPUT);
+  pinMode(Relay, OUTPUT);
 }
 
 void loop()
@@ -133,7 +131,7 @@ void loop()
   lcd.print("Load is ON");
   delay(750);
   lcd.clear();
-  digitalWrite(A4, HIGH); // set the Relay high
+  digitalWrite(Relay, HIGH); // set the Relay high
 
   for (long int j = set4; j >= 0; j--) // this for loopis used to decrease the total time in seconds
   {
@@ -172,14 +170,14 @@ void loop()
     delay(500);
 
     if (digitalRead(A3) == 1) {
-      digitalWrite(A4, LOW);
+      digitalWrite(Relay, LOW);
       break;
     }
 
     if (j == 0)
 
     {
-      digitalWrite(A4, LOW);   // Set the Relay LOW
+      digitalWrite(Relay, LOW);   // Set the Relay LOW
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Timer Stop");
@@ -191,5 +189,3 @@ void loop()
     }
   }
 }
-
-
